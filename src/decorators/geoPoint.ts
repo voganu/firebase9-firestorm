@@ -1,0 +1,86 @@
+// import { firestore } from 'firebase/app';
+import { GeoPoint as GeoPointOrig } from "firebase/firestore";
+import { FieldTypes, IGeoPointConfig, IGeoPoint, GeoPointData } from "../types";
+import FieldUtils from "../utils/FieldUtils";
+import { getOrCreateRepository } from "../store";
+import { GeoPoint } from "..";
+
+/**
+ * Deserializes a firestore geopoint into a firestorm geopoint.
+ * @param isArray Is the field an array.
+ * @param value The firestore geopoint(s) representation.
+ */
+const deserialize = (
+  isArray: boolean,
+  value: GeoPointOrig | GeoPointOrig[]
+): IGeoPoint | IGeoPoint[] => {
+  return FieldUtils.process(
+    isArray,
+    value,
+    (v: GeoPointOrig): GeoPoint => new GeoPoint(v.latitude, v.longitude)
+  );
+};
+
+/**
+ * Serializes our representation of a geopoint into a firestorm geopoint;
+ * @param isArray Whether the field is an array.
+ * @param value The firestorm geopoint(s) representation.
+ */
+const serialize = (
+  isArray: boolean,
+  value: IGeoPoint | IGeoPoint[]
+): GeoPointOrig | GeoPointOrig[] => {
+  return FieldUtils.process(
+    isArray,
+    value,
+    (v: IGeoPoint): GeoPointOrig => v.native
+  );
+};
+
+/**
+ * Converts our firestorm representation of geopoint to human-readable format.
+ * @param isArray Whether the field is an aray
+ * @param value The firestorm geopoint(s) representation.
+ */
+const toData = (
+  isArray: boolean,
+  value: IGeoPoint | IGeoPoint[]
+): GeoPointData | GeoPointData[] =>
+  FieldUtils.process(
+    isArray,
+    value,
+    (v: IGeoPoint): GeoPointData => ({
+      latitude: v.latitude,
+      longitude: v.longitude,
+    })
+  );
+
+/**
+ * Registers a geopoint field.
+ * @param fieldConfig The field configuration for the geopoint.
+ */
+export default function (fieldConfig?: IGeoPointConfig): Function {
+  return function (target: any, key: string): void {
+    const type = Reflect.getMetadata("design:type", target, key);
+    // Process the field configuration.
+    const field = FieldUtils.configure(
+      fieldConfig || {},
+      key,
+      type(),
+      FieldTypes.GeoPoint
+    );
+    // Serialization Functions
+    field.deserialize = (
+      value: GeoPointOrig | GeoPointOrig[]
+    ): IGeoPoint | IGeoPoint[] => deserialize(field.isArray, value);
+    field.serialize = (
+      value: IGeoPoint | IGeoPoint[]
+    ): GeoPointOrig | GeoPointOrig[] => serialize(field.isArray, value);
+    field.toData = (
+      value: IGeoPoint | IGeoPoint[]
+    ): GeoPointData | GeoPointData[] => toData(field.isArray, value);
+    // Register the field for the parent entity.
+    const repository = getOrCreateRepository(target.constructor.name);
+    repository.fields.set(key, field);
+  };
+}
