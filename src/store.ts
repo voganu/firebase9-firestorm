@@ -21,10 +21,10 @@ let store: IStore = {
  * @param config Configuration options for firestorm.
  */
 export const initialize = (
-  firestore: FirebaseFirestore,
+  db: FirebaseFirestore,
   config?: IFireormConfig
 ): void => {
-  store.firestore = firestore;
+  store.db = db;
   if (config) {
     (Object.keys(config) as (keyof IFireormConfig)[]).forEach((key): void => {
       store.config[key] = config[key];
@@ -38,7 +38,7 @@ export const initialize = (
 export const destroy = (): void => {
   store = {
     repositories: store.repositories,
-    firestore: undefined,
+    db: undefined,
     config: {
       fieldConversion: FieldConversionType.NoConversion,
     },
@@ -62,6 +62,7 @@ export const getRepository = (key: string): IRepository => {
  * @param key The name of the [[Entity]] class
  */
 export const getOrCreateRepository = (key: string): IRepository => {
+  // console.log(key);
   if (!store.repositories.has(key)) {
     store.repositories.set(key, {
       collectionConfig: {} as unknown as ICollectionConfig,

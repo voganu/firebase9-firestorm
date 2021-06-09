@@ -7,8 +7,8 @@ import {
   // IDocumentRef,
   // ICollection,
   timestamp,
+  ITimestamp,
 } from "../../src";
-import { ITimestamp } from "../../src/types";
 
 @rootCollection({
   name: "usersprivate",

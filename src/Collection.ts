@@ -1,7 +1,7 @@
 import {
   CollectionReference,
   QuerySnapshot,
-  collection,
+  collection as collectionOrig,
   doc,
   getDoc,
   updateDoc,
@@ -9,6 +9,7 @@ import {
   addDoc,
   deleteDoc,
   getDocs,
+  FirebaseFirestore,
 } from "firebase/firestore";
 import store, { getRepository } from "./store";
 import {
@@ -111,11 +112,13 @@ class Collection<T extends Entity, P extends Entity> //eslint-disable-next-line 
    * Creates the native firestore reference.
    */
   private buildNative(): CollectionReference {
-    const { firestore } = store();
-    if (firestore) {
-      return collection(firestore, this._path);
+    const db = store().db;
+    console.log("db = ");
+    console.log(db);
+    if (db) {
+      return collectionOrig(db, this._path);
     } else {
-      throw new Error("Undefined firestore");
+      throw new Error("Undefined firestore1");
     }
   }
 

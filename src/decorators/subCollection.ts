@@ -1,5 +1,5 @@
-import { ISubCollectionConfig, IEntity } from '../types';
-import { getOrCreateRepository } from '../store';
+import { ISubCollectionConfig, IEntity } from "../types";
+import { getOrCreateRepository } from "../store";
 
 /**
  * Registers a subcollection with firestorm.

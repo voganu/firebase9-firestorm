@@ -5,9 +5,6 @@ import { getOrCreateRepository } from "../store";
 export default function (fieldConfig?: IFieldConfig): Function {
   return function (target: any, key: string): void {
     const type = Reflect.getMetadata("design:type", target, key);
-    console.log(target);
-    console.log(fieldConfig);
-    console.log(key);
     const field = FieldUtils.configure(
       fieldConfig || {},
       key,

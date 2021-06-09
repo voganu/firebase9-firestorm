@@ -4,6 +4,7 @@ import "mocha";
 import { Collection, GeoPoint, ICollection } from "../../src";
 import Post from "../entities/Post";
 import chaiAsPromised from "chai-as-promised";
+// import User from "../entities/User";
 import User from "../entities/User";
 import UserPrivate from "../entities/UserPrivate";
 import { Timestamp } from "../../src/fields";
@@ -31,6 +32,7 @@ describe("[functional] querying data", (): void => {
   const createDocument = async (id?: string): Promise<void> => {
     const displayName = "Name-1";
     const user = new User();
+    // console.log(user);
     // const comment = new Comment();
     if (id) user.id = id;
     user.displayName = displayName;

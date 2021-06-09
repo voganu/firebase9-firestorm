@@ -1,5 +1,5 @@
 import * as firestorm from "../src";
-import { IFireormConfig } from "../src/types";
+// import { IFireormConfig } from "../src/types";
 // import * as firebase from 'firebase/app';
 import { FirebaseApp, initializeApp, deleteApp } from "firebase/app";
 import { getAuth, useAuthEmulator } from "firebase/auth";
@@ -16,7 +16,7 @@ import {
 
 // let firestore: firebase.firestore.Firestore;
 // let app: firebase.app.App;
-let firestore: FirebaseFirestore;
+let db: FirebaseFirestore;
 let app: FirebaseApp;
 const firebaseConfig = {
   apiKey: "AIzaSyB-_UmNEJ0bkFX0Mrk_GI5RMVq2qsKG70g",
@@ -32,9 +32,9 @@ before(async (): Promise<void> => {
   // require("dotenv").config();
   // app = initializeApp(JSON.parse(process.env.CLIENT_SDK_CONFIG as string));
   app = initializeApp(firebaseConfig);
-  firestore = getFirestoreOrig(app);
+  db = getFirestoreOrig(app);
   // const admin = firebaseAdmin.initializeApp();
-  useFirestoreEmulator(firestore, "localhost", 8080);
+  useFirestoreEmulator(db, "localhost", 8080);
   const auth = getAuth(app);
   useAuthEmulator(auth, "http://localhost:9099/", { disableWarnings: true });
   const functions = getFunctions();
@@ -43,22 +43,22 @@ before(async (): Promise<void> => {
   // const token = await admin.auth().createCustomToken("firestorm");
   // const auth = getAuth();
   // await signInWithCustomToken(auth, token);
-  firestore = getFirestoreOrig(app);
+  // firestore = getFirestoreOrig(app);
 });
 
 after((): void => {
   deleteApp(app);
 });
 
-export const start = (config?: IFireormConfig): void => {
-  firestorm.initialize(firestore, config);
+export const start = (config?: firestorm.IFireormConfig): void => {
+  firestorm.initialize(db, config);
 };
 
 export const reset = (): void => {
   firestorm.destroy();
 };
 
-export const getFirestore = (): FirebaseFirestore => firestore;
+export const getFirestore = (): FirebaseFirestore => db;
 export const bootstrapNull = (): void => {
   firestorm.initialize(null as any);
 };

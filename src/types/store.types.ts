@@ -10,7 +10,7 @@ import { FieldConversionType } from "./enum.types";
 import { IFieldMeta } from "./field.types";
 
 export interface IStore {
-  firestore?: FirebaseFirestore;
+  db?: FirebaseFirestore;
   repositories: Map<string, IRepository>;
   config: IFireormConfig;
 }

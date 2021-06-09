@@ -2,15 +2,18 @@ import UserPrivate from "./UserPrivate";
 import {
   field,
   rootCollection,
+  ITimestamp,
   // documentRef,
   Entity,
   subCollection,
   // IDocumentRef,
   ICollection,
   timestamp,
+  // ICollectionConfig,
+  // IFieldConfig,
+  // getOrCreateRepository,
 } from "../../src";
-import { ITimestamp } from "../../src/types";
-
+// import { ITimestamp } from "../../firestorm/src/types";
 @rootCollection({
   name: "users",
 })

@@ -1,5 +1,5 @@
-import { ICollectionConfig } from '../types';
-import { getOrCreateRepository } from '../store';
+import { ICollectionConfig } from "../types";
+import { getOrCreateRepository } from "../store";
 
 /**
  * Registers a collection with firestorm.
