@@ -1,5 +1,5 @@
 {
-  "name": "@ivvsoft/firebase-firestorm-v9",
+  "name": "firebase9-firestorm",
   "version": "0.0.1-development",
   "description": "A firestore ORM for Typescript",
   "main": "lib/index.js",
@@ -7,7 +7,7 @@
     "build": "tsc",
     "test": "GOOGLE_APPLICATION_CREDENTIALS='service-account.json' nyc --reporter=lcov mocha -r ts-node/register test/**/*.spec.ts && cat ./coverage/lcov.info | codacy-coverage",
     "test:dev": "GOOGLE_APPLICATION_CREDENTIALS='service-account.json' nyc mocha -r ts-node/register test/**/*.spec.ts",
-    "test1": "nyc mocha -r ts-node/register test/**/*.spec.ts",
+    "test1": "nyc mocha -r ts-node/register test/functional/*.spec.ts",
     "docs": "typedoc --excludeExternals --mode file --out docs src",
     "lint": "eslint src/**/*.ts",
     "commit": "npx git-cz",
@@ -22,9 +22,10 @@
   "files": [
     "lib/**/*"
   ],
-  "author": "ivvsoft",
+  "author": "voganu",
   "repository": {
-    "type": "git"
+    "type": "git",
+    "url": "https://github.com/voganu/firebase9-firestorm"
   },
   "license": "MIT",
   "devDependencies": {

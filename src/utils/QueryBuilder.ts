@@ -1,5 +1,18 @@
 // import { firestore } from 'firebase/app';
-import { Query } from "firebase/firestore";
+import {
+  Query,
+  getDocs,
+  QuerySnapshot,
+  where,
+  query as queryOrig,
+  orderBy as orderByOrig,
+  startAt as startAtOrig,
+  startAfter as startAfterOrig,
+  endAt as endAtOrig,
+  endBefore as endBeforeOrig,
+  limit as limitOrig,
+} from "firebase/firestore";
+// import { Query } from "../Query";
 
 import { IEntity, ICollectionQuery, ICollection, IFieldMeta } from "../types";
 
@@ -18,6 +31,7 @@ export default class QueryBuilder {
     query: ICollectionQuery<T>
   ): Query {
     const collectionRef = collection.native;
+    const queryInit = queryOrig(collectionRef);
     const {
       where: whereQueries,
       orderBy: orderByQueries,
@@ -27,46 +41,49 @@ export default class QueryBuilder {
       endBefore: endBeforeQuery,
       limit: limitQuery,
     } = query;
-    let q = (whereQueries || []).reduce((accum: any, curr): Query => {
+    let q = (whereQueries || []).reduce((accum: Query, curr): Query => {
       const [property, operator, value] = curr;
       const field = fields.get(property as string);
       if (field) {
-        return accum.where(field.name, operator, value);
+        return queryOrig(accum, where(field.name, operator, value));
       }
       throw new Error(
         `Could not find property ${property} in collection ${collection.path}`
       );
-    }, collectionRef);
+    }, queryInit);
 
     if (orderByQueries) {
       orderByQueries.forEach((obq): void => {
-        q = q.orderBy(obq[0], obq[1] || "asc");
+        q = queryOrig(q, orderByOrig(obq[0] as string, obq[1] || "asc"));
       });
       if (startAtQuery || startAfterQuery) {
         let addedStartAt = false;
         if (startAtQuery) {
           addedStartAt = true;
-          q = q.startAt(startAtQuery);
+          q = queryOrig(q, startAtOrig(startAtQuery));
         }
         if (startAfterQuery && !addedStartAt) {
-          q = q.startAfter(startAfterQuery);
+          q = queryOrig(q, startAfterOrig(startAtQuery));
         }
       }
       if (endAtQuery || endBeforeQuery) {
         let addedEndAt = false;
         if (endAtQuery) {
           addedEndAt = true;
-          q = q.endAt(endAtQuery);
+          q = queryOrig(q, endAtOrig(endAtQuery));
         }
         if (endBeforeQuery && !addedEndAt) {
-          q = q.endBefore(endBeforeQuery);
+          q = queryOrig(q, endBeforeOrig(endBeforeQuery));
         }
       }
     }
 
     if (limitQuery) {
-      q = q.limit(limitQuery);
+      q = queryOrig(q, limitOrig(limitQuery));
     }
     return q;
+  }
+  public static async get<T>(query: Query<T>): Promise<QuerySnapshot<T>> {
+    return await getDocs(query);
   }
 }

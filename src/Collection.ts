@@ -113,8 +113,6 @@ class Collection<T extends Entity, P extends Entity> //eslint-disable-next-line 
    */
   private buildNative(): CollectionReference {
     const db = store().db;
-    console.log("db = ");
-    console.log(db);
     if (db) {
       return collectionOrig(db, this._path);
     } else {
@@ -198,7 +196,10 @@ class Collection<T extends Entity, P extends Entity> //eslint-disable-next-line 
         const fields = getRepository(
           this._Entity.prototype.constructor.name
         ).fields;
-        querySnapshotPromise = getDocs(QueryBuilder.query(this, fields, query));
+        console.log(QueryBuilder.query(this, fields, query));
+        querySnapshotPromise = QueryBuilder.get(
+          QueryBuilder.query(this, fields, query)
+        );
       } else {
         querySnapshotPromise = getDocs(this._native);
       }
