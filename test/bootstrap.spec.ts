@@ -16,7 +16,7 @@ import {
 
 // let firestore: firebase.firestore.Firestore;
 // let app: firebase.app.App;
-let db: FirebaseFirestore;
+let firestore: FirebaseFirestore;
 let app: FirebaseApp;
 const firebaseConfig = {
   apiKey: "AIzaSyB-_UmNEJ0bkFX0Mrk_GI5RMVq2qsKG70g",
@@ -32,9 +32,9 @@ before(async (): Promise<void> => {
   // require("dotenv").config();
   // app = initializeApp(JSON.parse(process.env.CLIENT_SDK_CONFIG as string));
   app = initializeApp(firebaseConfig);
-  db = getFirestoreOrig(app);
+  firestore = getFirestoreOrig(app);
   // const admin = firebaseAdmin.initializeApp();
-  useFirestoreEmulator(db, "localhost", 8080);
+  useFirestoreEmulator(firestore, "localhost", 8080);
   const auth = getAuth(app);
   useAuthEmulator(auth, "http://localhost:9099/", { disableWarnings: true });
   const functions = getFunctions();
@@ -51,14 +51,14 @@ after((): void => {
 });
 
 export const start = (config?: firestorm.IFireormConfig): void => {
-  firestorm.initialize(db, config);
+  firestorm.initialize(firestore, config);
 };
 
 export const reset = (): void => {
   firestorm.destroy();
 };
 
-export const getFirestore = (): FirebaseFirestore => db;
+export const getFirestore = (): FirebaseFirestore => firestore;
 export const bootstrapNull = (): void => {
   firestorm.initialize(null as any);
 };
