@@ -1,4 +1,5 @@
 // import { firestore } from 'firebase/app';
+import * as bootstrap from "../bootstrap.spec";
 import {
   Query,
   collection,
@@ -17,7 +18,6 @@ import chaiAsPromised from "chai-as-promised";
 import "mocha";
 import { Collection, ICollection, IQuery } from "../../src";
 
-import * as bootstrap from "../bootstrap.spec";
 import Post from "../entities/Post";
 
 chai.use(chaiAsPromised);
@@ -27,9 +27,13 @@ describe("[unit] Query", (): void => {
   let baseQuery: IQuery<Post>;
   let firestoreQuery: Query;
   beforeEach((): void => {
+    bootstrap.start();
     postCollection = Collection(Post);
     baseQuery = postCollection.query();
     firestoreQuery = collection(bootstrap.getFirestore(), "posts");
+  });
+  afterEach((): void => {
+    bootstrap.reset();
   });
   describe("methods", (): void => {
     const isQueryResultEqual = async (

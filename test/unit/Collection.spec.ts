@@ -6,7 +6,7 @@ import {
   getDoc,
   doc,
 } from "firebase/firestore";
-import { Collection, ICollection } from "../../src";
+import { Collection, ICollection, collection_ } from "../../src";
 
 import * as bootstrap from "../bootstrap.spec";
 import Post from "../entities/Post";
@@ -19,7 +19,7 @@ describe("[unit] Collection", (): void => {
       bootstrap.reset();
     });
     it("should throw an error", (): void => {
-      expect((): ICollection<Post> => Collection(Post)).to.throw(Error);
+      expect((): ICollection<Post> => collection_(Post)).to.throw(Error);
     });
   });
 

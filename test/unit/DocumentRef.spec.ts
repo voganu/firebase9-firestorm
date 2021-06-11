@@ -2,7 +2,7 @@
 import {
   FirebaseFirestore as firestoreTypes,
   collection,
-  getDoc,
+  // getDoc,
   doc as docOrig,
 } from "firebase/firestore";
 import { expect } from "chai";

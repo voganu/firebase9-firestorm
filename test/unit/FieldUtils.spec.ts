@@ -9,7 +9,8 @@ describe("[unit] FieldUtils", () => {
   describe("#configure()", () => {
     describe("field name is provided", () => {
       for (const fieldType in FieldTypes) {
-        const type = FieldTypes[fieldType] as any as FieldTypes;
+        const type: FieldTypes =
+          FieldTypes[fieldType as keyof typeof FieldTypes];
         const result = FieldUtils.configure(
           { name: "TEST-FIELD-NAME" },
           "testFieldName",
