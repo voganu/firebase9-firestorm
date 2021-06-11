@@ -17,6 +17,7 @@ import {
   ICollection,
   IDocumentRef,
   WriteTypes,
+  IQuery,
 } from "./types";
 import { QueryBuilder, FirestoreSerializer } from "./utils";
 import DocumentRef from "./fields/DocumentRef";
@@ -113,6 +114,7 @@ class Collection<T extends Entity, P extends Entity> //eslint-disable-next-line 
    */
   private buildNative(): CollectionReference {
     const db = store().db;
+    // console.log(store().db);
     if (db) {
       return collectionOrig(db, this._path);
     } else {
@@ -196,7 +198,6 @@ class Collection<T extends Entity, P extends Entity> //eslint-disable-next-line 
         const fields = getRepository(
           this._Entity.prototype.constructor.name
         ).fields;
-        console.log(QueryBuilder.query(this, fields, query));
         querySnapshotPromise = QueryBuilder.get(
           QueryBuilder.query(this, fields, query)
         );
@@ -247,3 +248,61 @@ export default <T extends Entity, P extends Entity>(
   model: new () => T,
   parent?: IDocumentRef<P>
 ): ICollection<T, P> => new Collection<T, P>(model, parent);
+
+export const collection_ = <T extends Entity, P extends Entity>(
+  model: new () => T,
+  parent?: IDocumentRef<P>
+): ICollection<T, P> => {
+  return new Collection<T, P>(model, parent);
+};
+export const create_ = <T extends Entity>(
+  col: ICollection<T>,
+  entity: T
+): Promise<T | null> => {
+  return col.create(entity);
+};
+
+export const getDoc_ = <T extends Entity>(
+  col: ICollection<T>,
+  id: string
+): Promise<T | null> => {
+  {
+    return col.get(id);
+  }
+};
+export const getDocByRef_ = <T extends Entity>(
+  ref: IDocumentRef<T>
+): Promise<T | null> => {
+  {
+    return ref.get();
+  }
+};
+
+export const doc_ = <T extends Entity>(
+  col: ICollection<T>,
+  id: string
+): IDocumentRef<T> => {
+  return col.doc(id);
+};
+
+export const remove_ = <T extends Entity>(
+  col: ICollection<T>,
+  id: string
+): Promise<void> => {
+  return col.remove(id);
+};
+export const query_ = <T extends Entity>(col: ICollection<T>): IQuery<T> => {
+  return col.query();
+};
+export const find_ = <T extends Entity>(
+  col: ICollection<T>,
+  query?: ICollectionQuery<T>
+): Promise<T[]> => {
+  return col.find(query);
+};
+export const update = <T extends Entity>(
+  col: ICollection<T>,
+  entity: T
+): Promise<T | null> => {
+  return col.update(entity);
+};

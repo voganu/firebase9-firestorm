@@ -19,8 +19,8 @@ export default class Entity implements IEntity {
     result.id = this.id;
     fields.forEach((fieldConfig, key): void => {
       const k = key as keyof this;
-      // console.log(fieldConfig);
       result[key] = fieldConfig.toData(this[k]);
+      // console.log(`key = ${key} result[key] = ${result[key]}`);
     });
     Object.keys(result).forEach((key): void => {
       result[key] === undefined ? delete result[key] : "";

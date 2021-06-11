@@ -1,16 +1,19 @@
 import Entity from "./Entity";
 import { IDocumentSnapshot, ICollection } from "./types/collection.types";
 import { IDocumentRef } from "./types";
-import { DocumentSnapshot, SnapshotMetadata } from "firebase/firestore";
+import {
+  DocumentSnapshot as DocumentSnapshotOrig,
+  SnapshotMetadata,
+} from "firebase/firestore";
 import { FirestoreSerializer } from "./utils";
 
-export default class DocumentSnapshot1<T extends Entity> // eslint-disable-next-line @typescript-eslint/indent
+export default class DocumentSnapshot<T extends Entity> // eslint-disable-next-line @typescript-eslint/indent
   implements IDocumentSnapshot<T>
 {
   /**
    * @hidden
    */
-  private _nativeSnapshot: DocumentSnapshot;
+  private _nativeSnapshot: DocumentSnapshotOrig;
   /**
    * @hidden
    */
@@ -23,7 +26,7 @@ export default class DocumentSnapshot1<T extends Entity> // eslint-disable-next-
    * @param collection The parent collection for the entity.
    */
   public constructor(
-    nativeSnapshot: DocumentSnapshot,
+    nativeSnapshot: DocumentSnapshotOrig,
     Entity: new () => T,
     collection: ICollection<T>
   ) {

@@ -63,7 +63,7 @@ export default class QueryBuilder {
           q = queryOrig(q, startAtOrig(startAtQuery));
         }
         if (startAfterQuery && !addedStartAt) {
-          q = queryOrig(q, startAfterOrig(startAtQuery));
+          q = queryOrig(q, startAfterOrig(startAfterQuery));
         }
       }
       if (endAtQuery || endBeforeQuery) {
