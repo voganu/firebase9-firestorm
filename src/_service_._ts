@@ -1,0 +1,118 @@
+import { Query, QuerySnapshot } from "firebase/firestore";
+import { CollectionClass } from "./Collection";
+// import DocumentSnapshot from "./DocumentSnapshot";
+// import Query from "./Query";
+import {
+  IDocumentSnapshot,
+  IQuerySnapshot,
+  IEntity,
+} from "./types/collection.types";
+import { IFieldMeta } from "./types/field.types";
+
+// import store, { getRepository } from "./store";
+import {
+  ICollectionQuery,
+  ICollection,
+  IDocumentRef,
+  // WriteTypes,
+  IQuery,
+} from "./types";
+// import { QueryBuilder, FirestoreSerializer } from "./utils";
+// import DocumentRef from "./fields/DocumentRef";
+import Entity from "./Entity";
+import QuerySnapshot_ from "./QuerySnapshot";
+import { QueryBuilder } from "./utils";
+// import Query from "./Query";
+
+export const collection_ = <T extends Entity, P extends Entity>(
+  model: new () => T,
+  parent?: IDocumentRef<P>
+): ICollection<T, P> => {
+  return new CollectionClass<T, P>(model, parent);
+};
+export const createDoc_ = <T extends Entity>(
+  col: ICollection<T>,
+  entity: T
+): Promise<T | null> => {
+  return col.create(entity);
+};
+
+export const getDoc_ = <T extends Entity>(
+  col: ICollection<T>,
+  id: string
+): Promise<T | null> => {
+  {
+    return col.get(id);
+  }
+};
+export const getDocByRef_ = <T extends Entity>(
+  ref: IDocumentRef<T>
+): Promise<T | null> => {
+  {
+    return ref.get();
+  }
+};
+
+export const doc_ = <T extends Entity>(
+  col: ICollection<T>,
+  id: string
+): IDocumentRef<T> => {
+  return col.doc(id);
+};
+
+export const removeDoc_ = <T extends Entity>(
+  col: ICollection<T>,
+  id: string
+): Promise<void> => {
+  return col.remove(id);
+};
+export const queryDocs_ = <T extends Entity>(
+  col: ICollection<T>
+): IQuery<T> => {
+  return col.query();
+};
+export const findDocs_ = <T extends Entity>(
+  col: ICollection<T>,
+  query?: ICollectionQuery<T>
+): Promise<T[]> => {
+  return col.find(query);
+};
+export const updateDoc_ = <T extends Entity>(
+  col: ICollection<T>,
+  entity: T
+): Promise<T | null> => {
+  return col.update(entity);
+};
+export const onSnapshotDoc_ = <T extends Entity>(
+  entity: T,
+  // ref: IDocumentRef<T>,
+  onNext: (snapshot: IDocumentSnapshot<T>) => void,
+  onError?: (e: Error) => void
+): (() => void) => {
+  return entity.ref.onSnapshot((snapshot_): void => {
+    onNext(snapshot_);
+  }, onError);
+};
+export const onSnapshotDocs_ = <T extends Entity>(
+  query: IQuery<T>,
+  // ref: IDocumentRef<T>,
+  onNext: (snapshot: IQuerySnapshot<T>) => void,
+  onError?: (e: Error) => void
+): (() => void) => {
+  return query.onSnapshot((snapshot_): void => {
+    onNext(snapshot_);
+  }, onError);
+};
+export const docsBuilder_ = <T extends IEntity>(
+  collection: ICollection<T>,
+  fields: Map<string, IFieldMeta>,
+  query: ICollectionQuery<T>
+): Query => {
+  return QueryBuilder.query(collection, fields, query);
+};
+
+export const getDocsBuilder_ = <T>(
+  query: Query<T>
+): Promise<QuerySnapshot<T>> => {
+  return QueryBuilder.get(query);
+};

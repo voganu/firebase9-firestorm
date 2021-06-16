@@ -6,11 +6,11 @@ import {
   FieldTypes,
   IDocumentRef,
   IEntity,
-  ICollection,
+  _ICollection,
 } from "../types";
 import FieldUtils from "../utils/FieldUtils";
 import { getOrCreateRepository, getRepository } from "../store";
-import { Entity, Collection, DocumentRef } from "..";
+import { Entity, _collection, DocumentRef } from "..";
 
 /**
  * Deserializes a firestore document reference into a firestorm document reference.
@@ -53,18 +53,18 @@ const deserialize = (
     const buildCollectionTree = (
       entityName: string,
       firestoreCollectionRef: CollectionReference
-    ): ICollection<IEntity, any> | any => {
+    ): _ICollection<IEntity, any> | any => {
       const collectionRepository = getRepository(entityName);
       if (collectionRepository.entity) {
         if (!collectionRepository.parent) {
-          return Collection(collectionRepository.entity);
+          return _collection(collectionRepository.entity);
         }
         if (
           firestoreCollectionRef.parent &&
           firestoreCollectionRef.parent.parent &&
           collectionRepository.parent.entity
         ) {
-          return Collection(
+          return _collection(
             collectionRepository.entity,
             DocumentRef(
               firestoreCollectionRef.parent.id,

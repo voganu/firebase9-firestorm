@@ -1,6 +1,6 @@
 // import { firestore } from 'firebase/app';
 import { DocumentSnapshot } from "firebase/firestore";
-import { FieldTypes, ICollection, WriteTypes } from "../types";
+import { FieldTypes, _ICollection, WriteTypes } from "../types";
 import { getRepository } from "../store";
 import Entity from "../Entity";
 import DocumentRef from "../fields/DocumentRef";
@@ -44,7 +44,7 @@ export default class FirestoreSerializer {
   public static deserialize<T extends Entity>(
     doc: DocumentSnapshot,
     Model: new () => T,
-    parentCollection: ICollection<T>
+    parentCollection: _ICollection<T>
   ): T {
     const { fields, subcollections } = getRepository(
       Model.prototype.constructor.name

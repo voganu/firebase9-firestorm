@@ -8,7 +8,7 @@ import {
   doc_,
   getDoc_,
   getDocByRef_,
-  find_,
+  findDocs_,
 } from "../../src";
 import Post from "../entities/Post";
 import chaiAsPromised from "chai-as-promised";

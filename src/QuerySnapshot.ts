@@ -8,14 +8,14 @@ import {
 
 import Query from "./Query";
 import Entity from "./Entity";
-import { IQuerySnapshot, ICollection, DocumentChange } from "./types";
+import { _IQuerySnapshot, _ICollection, DocumentChange } from "./types";
 import { FirestoreSerializer } from "./utils";
 
 /**
  * A wrapper around the Firestore QuerySnapshot class.
  */
 export default class QuerySnapshot<T extends Entity> // eslint-disable-next-line @typescript-eslint/indent
-  implements IQuerySnapshot<T>
+  implements _IQuerySnapshot<T>
 {
   /**
    * @hidden
@@ -24,7 +24,7 @@ export default class QuerySnapshot<T extends Entity> // eslint-disable-next-line
   /**
    * @hidden
    */
-  private _collection: ICollection<T>;
+  private _collection: _ICollection<T>;
   /**
    * @hidden
    */
@@ -47,7 +47,7 @@ export default class QuerySnapshot<T extends Entity> // eslint-disable-next-line
   public constructor(
     nativeSnapshot: QuerySnapshotOrig,
     Entity: new () => T,
-    collection: ICollection<T>,
+    collection: _ICollection<T>,
     query: Query<T>
   ) {
     this._Entity = Entity;

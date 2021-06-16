@@ -1,10 +1,11 @@
+import dotenv from "dotenv";
 import * as firestorm from "../src";
 // import { IFireormConfig } from "../src/types";
 // import * as firebase from 'firebase/app';
 import { FirebaseApp, initializeApp, deleteApp } from "firebase/app";
 import { getAuth, useAuthEmulator } from "firebase/auth";
 import { getFunctions, useFunctionsEmulator } from "firebase/functions";
-import { firebaseConfig } from "./.firebase";
+// import { firebaseConfig } from "./.firebase";
 // import firebaseAdmin from "firebase-admin";
 // import 'firebase/firestore';
 // import 'firebase/auth';
@@ -13,14 +14,23 @@ import {
   useFirestoreEmulator,
   getFirestore as getFirestoreOrig,
 } from "firebase/firestore";
+dotenv.config();
 
 // let firestore: firebase.firestore.Firestore;
 // let app: firebase.app.App;
 let firestore: FirebaseFirestore;
 let app: FirebaseApp;
-
+const firebaseConfig = {
+  apiKey: process.env.apiKey,
+  authDomain: process.env.authDomain,
+  databaseURL: process.env.databaseURL,
+  projectId: process.env.projectId,
+  storageBucket: process.env.storageBucket,
+  messagingSenderId: process.env.messagingSenderId,
+  appId: process.env.appId,
+  measurementId: process.env.measurementId,
+};
 before(async (): Promise<void> => {
-  // require("dotenv").config();
   // app = initializeApp(JSON.parse(process.env.CLIENT_SDK_CONFIG as string));
   app = initializeApp(firebaseConfig);
   firestore = getFirestoreOrig(app);

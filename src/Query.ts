@@ -16,7 +16,7 @@ import {
 } from "firebase/firestore";
 
 import { Entity } from ".";
-import { IFieldMeta, ICollection, IQuery } from "./types";
+import { IFieldMeta, _ICollection, _IQuery } from "./types";
 import QuerySnapshot from "./QuerySnapshot";
 
 /**
@@ -24,9 +24,9 @@ import QuerySnapshot from "./QuerySnapshot";
  * together, as per the standard firestore SDK.
  * @typeparam T The entity for the query.
  */
-export default class Query<T extends Entity> implements IQuery<T> {
+export default class _Query<T extends Entity> implements _IQuery<T> {
   private _Entity: new () => T;
-  private _collection: ICollection<T>;
+  private _collection: _ICollection<T>;
   private _native: QueryOrig;
   private _fields: Map<string, IFieldMeta>;
 
@@ -39,7 +39,7 @@ export default class Query<T extends Entity> implements IQuery<T> {
    */
   public constructor(
     Entity: new () => T,
-    collection: ICollection<T>,
+    collection: _ICollection<T>,
     fields: Map<string, IFieldMeta>,
     native: QueryOrig
   ) {
@@ -48,14 +48,16 @@ export default class Query<T extends Entity> implements IQuery<T> {
     this._fields = fields;
     this._native = native;
   }
-
+  public get native(): QueryOrig {
+    return this._native;
+  }
   /**
    * Applies a where filter to the query.
    * @param property The property to query.
    * @param op The operation to apply.
    * @param value The value to test for.
    */
-  public where(property: keyof T, op: WhereFilterOp, value: any): Query<T> {
+  public where(property: keyof T, op: WhereFilterOp, value: any): _Query<T> {
     const field = this._fields.get(property as string);
     if (field) {
       return this.appendNativeQuery(
@@ -70,7 +72,7 @@ export default class Query<T extends Entity> implements IQuery<T> {
    * @param property The property to order by.
    * @param sort The order direction. Default value is ascending.
    */
-  public orderBy(property: keyof T, sort?: OrderByDirection): Query<T> {
+  public orderBy(property: keyof T, sort?: OrderByDirection): _Query<T> {
     const field = this._fields.get(property as string);
     if (field) {
       return this.appendNativeQuery(
@@ -84,7 +86,7 @@ export default class Query<T extends Entity> implements IQuery<T> {
    * Applies a limit filter to the query.
    * @param amount The maximum number of documents to return.
    */
-  public limit(amount: number): Query<T> {
+  public limit(amount: number): _Query<T> {
     return this.appendNativeQuery(query(this._native, Limit(amount)));
   }
 
@@ -92,7 +94,7 @@ export default class Query<T extends Entity> implements IQuery<T> {
    * Applies a start at filter to the query.
    * @param fieldValues The field values to start this query at, in order of the query's order by.
    */
-  public startAt(...fieldValues: any[]): Query<T> {
+  public startAt(...fieldValues: any[]): _Query<T> {
     return this.appendNativeQuery(
       query(this._native, startAtOrig(...fieldValues))
     );
@@ -102,7 +104,7 @@ export default class Query<T extends Entity> implements IQuery<T> {
    * Applies a start after filter to the query.
    * @param fieldValues The field values to start this query after, in order of the query's order by.
    */
-  public startAfter(...fieldValues: any[]): Query<T> {
+  public startAfter(...fieldValues: any[]): _Query<T> {
     return this.appendNativeQuery(
       query(this._native, startAfterOrig(...fieldValues))
     );
@@ -112,7 +114,7 @@ export default class Query<T extends Entity> implements IQuery<T> {
    * Applies an end at filter to the query.
    * @param fieldValues The field values to end this query at, in order of the query's order by.
    */
-  public endAt(...fieldValues: any[]): Query<T> {
+  public endAt(...fieldValues: any[]): _Query<T> {
     return this.appendNativeQuery(
       query(this._native, endAtOrig(...fieldValues))
     );
@@ -122,7 +124,7 @@ export default class Query<T extends Entity> implements IQuery<T> {
    * Applies an end before filter to the query.
    * @param fieldValues The field values to end this query before, in order of the query's order by.
    */
-  public endBefore(...fieldValues: any[]): Query<T> {
+  public endBefore(...fieldValues: any[]): _Query<T> {
     return this.appendNativeQuery(
       query(this._native, endBeforeOrig(...fieldValues))
     );
@@ -134,43 +136,43 @@ export default class Query<T extends Entity> implements IQuery<T> {
    * @param onError Callback which is called when an error occurs.
    * @returns An unsubscribe function.
    */
-  public onSnapshot(
-    onNext: (snapshot: QuerySnapshot<T>) => void,
-    onError?: (error: Error) => void
-  ): () => void {
-    return onSnapshotOrig(
-      this._native,
-      (snapshot: QuerySnapshotOrig): void => {
-        onNext(this.buildSnapshot(snapshot));
-      },
-      onError
-    );
-  }
+  // public onSnapshot(
+  //   onNext: (snapshot: QuerySnapshot<T>) => void,
+  //   onError?: (error: Error) => void
+  // ): () => void {
+  //   return onSnapshotOrig(
+  //     this._native,
+  //     (snapshot: QuerySnapshotOrig): void => {
+  //       onNext(this.buildSnapshot(snapshot));
+  //     },
+  //     onError
+  //   );
+  // }
 
-  public get(): Promise<QuerySnapshot<T>> {
-    return new Promise((resolve): void => {
-      getDocs(this._native).then((snapshot): void => {
-        resolve(this.buildSnapshot(snapshot));
-      });
-      // this._native.get().then((snapshot): void => {
-      //   resolve(this.buildSnapshot(snapshot));
-      // });
-    });
-  }
+  // public get(): Promise<QuerySnapshot<T>> {
+  //   return new Promise((resolve): void => {
+  //     getDocs(this._native).then((snapshot): void => {
+  //       resolve(this.buildSnapshot(snapshot));
+  //     });
+  //     // this._native.get().then((snapshot): void => {
+  //     //   resolve(this.buildSnapshot(snapshot));
+  //     // });
+  //   });
+  // }
 
   /**
    * Appends a query to the current query.
    * @param query The query to append.
    */
-  private appendNativeQuery(query: QueryOrig): Query<T> {
-    return new Query(this._Entity, this._collection, this._fields, query);
+  private appendNativeQuery(query: QueryOrig): _Query<T> {
+    return new _Query(this._Entity, this._collection, this._fields, query);
   }
 
   /**
    * Creates a firestorm snapshot from the firestore snapshot.
    * @param nativeSnapshot The native query document snapshot.
    */
-  private buildSnapshot(nativeSnapshot: QuerySnapshotOrig): QuerySnapshot<T> {
+  public buildSnapshot(nativeSnapshot: QuerySnapshotOrig): QuerySnapshot<T> {
     return new QuerySnapshot(
       nativeSnapshot,
       this._Entity,
@@ -179,3 +181,30 @@ export default class Query<T extends Entity> implements IQuery<T> {
     );
   }
 }
+
+export const _getDocs = <T extends Entity>(
+  query: _IQuery<T>
+): Promise<QuerySnapshot<T>> => {
+  return new Promise((resolve): void => {
+    getDocs(query.native).then((snapshot): void => {
+      resolve(query.buildSnapshot(snapshot));
+    });
+    // this._native.get().then((snapshot): void => {
+    //   resolve(this.buildSnapshot(snapshot));
+    // });
+  });
+};
+
+export const _onSnapshotDocs = <T extends Entity>(
+  query: _Query<T>,
+  onNext: (snapshot: QuerySnapshot<T>) => void,
+  onError?: (error: Error) => void
+): (() => void) => {
+  return onSnapshotOrig(
+    query.native,
+    (snapshot: QuerySnapshotOrig): void => {
+      onNext(query.buildSnapshot(snapshot));
+    },
+    onError
+  );
+};

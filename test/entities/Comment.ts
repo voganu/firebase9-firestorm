@@ -1,16 +1,16 @@
 import Reply from "./Reply";
-import { ICollection, Entity, field, subCollection } from '../../src';
+import { _ICollection, Entity, field, subCollection } from "../../src";
 
 export default class Comment extends Entity {
-  @field({ name: 'content' })
+  @field({ name: "content" })
   content!: string;
 
-  @field({ name: 'by' })
+  @field({ name: "by" })
   by!: string;
 
   @subCollection({
-    name: 'replies',
+    name: "replies",
     entity: Reply,
   })
-  replies!: ICollection<Reply>;
+  replies!: _ICollection<Reply>;
 }

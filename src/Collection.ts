@@ -9,15 +9,16 @@ import {
   addDoc,
   deleteDoc,
   getDocs,
-  FirebaseFirestore,
+  // FirebaseFirestore,
 } from "firebase/firestore";
 import store, { getRepository } from "./store";
 import {
   ICollectionQuery,
-  ICollection,
+  _ICollection,
   IDocumentRef,
   WriteTypes,
-  IQuery,
+  _IQuery,
+  _IDocumentSnapshot,
 } from "./types";
 import { QueryBuilder, FirestoreSerializer } from "./utils";
 import DocumentRef from "./fields/DocumentRef";
@@ -30,8 +31,8 @@ import Query from "./Query";
  * @typeparam P The entity for the collection parent.
  */
 
-class Collection<T extends Entity, P extends Entity> //eslint-disable-next-line @typescript-eslint/indent
-  implements ICollection<T, P>
+export class CollectionClass<T extends Entity, P extends Entity> //eslint-disable-next-line @typescript-eslint/indent
+  implements _ICollection<T, P>
 {
   /**
    * @hidden
@@ -83,6 +84,10 @@ class Collection<T extends Entity, P extends Entity> //eslint-disable-next-line 
     return this._native;
   }
 
+  public get entity(): new () => T {
+    return this._Entity;
+  }
+
   /**
    * @hidden
    * Creates the path to the collection.
@@ -126,118 +131,6 @@ class Collection<T extends Entity, P extends Entity> //eslint-disable-next-line 
    * Gets a document reference from the collection.
    * @param id The document ID.
    */
-  public doc(id: string): IDocumentRef<T> {
-    return DocumentRef(id, this._Entity, this);
-  }
-
-  /**
-   * Gets a document with a provided ID
-   * @param id The ID of the document.
-   *
-   * @returns The entity.
-   */
-  // public async get(id: string): <T | null> {
-  //   const dc = await getDoc(doc(this._native, id));
-  //   return FirestoreSerializer.deserialize(dc, this._Entity, this);
-  // }
-
-  public get(id: string): Promise<T | null> {
-    return new Promise(async (resolve) => {
-      const dc = await getDoc(doc(this._native, id));
-      if (dc.exists()) {
-        resolve(FirestoreSerializer.deserialize(dc, this._Entity, this));
-      }
-      return resolve(null);
-    });
-  }
-
-  /**
-   * Updates a document from an entity instance.
-   * @param entity The entity (with ID) to update.
-   *
-   * @returns The updated entity.
-   */
-  public async update(entity: T): Promise<T | null> {
-    if (!entity.id) {
-      throw new Error(
-        `An ID must be provided when updating ${entity.constructor.name}`
-      );
-    }
-    const { id, ...data } = FirestoreSerializer.serialize(
-      entity,
-      WriteTypes.Update
-    );
-    await updateDoc(doc(this._native, id), data);
-    return await this.get(entity.id);
-  }
-
-  /**
-   * Creates a new document from an entity instance.
-   * @param entity An instance of the entity.
-   *
-   * @returns The created entity.
-   */
-  public async create(entity: T): Promise<T | null> {
-    const { id, ...data } = FirestoreSerializer.serialize(
-      entity,
-      WriteTypes.Create
-    );
-    if (id) {
-      await setDoc(doc(this._native, id), data);
-      return await this.get(id);
-    } else {
-      const aD = await addDoc(this._native, data);
-      return await this.get(aD.id);
-    }
-  }
-
-  public find(query?: ICollectionQuery<T>): Promise<T[]> {
-    return new Promise((resolve): void => {
-      let querySnapshotPromise: Promise<QuerySnapshot>;
-      if (query) {
-        const fields = getRepository(
-          this._Entity.prototype.constructor.name
-        ).fields;
-        querySnapshotPromise = QueryBuilder.get(
-          QueryBuilder.query(this, fields, query)
-        );
-      } else {
-        querySnapshotPromise = getDocs(this._native);
-      }
-      querySnapshotPromise.then((querySnapshot): void => {
-        resolve(
-          querySnapshot.docs.map((snapshot): T => {
-            return FirestoreSerializer.deserialize(
-              snapshot,
-              this._Entity,
-              this
-            ) as T;
-          })
-        );
-      });
-    });
-  }
-  /**
-   * Removes a document from the collection.
-   * @param id The document ID to remove.
-   */
-  public remove(id: string): Promise<void> {
-    return new Promise((resolve): void => {
-      deleteDoc(doc(this._native, id)).then((): void => {
-        resolve();
-      });
-    });
-  }
-
-  /**
-   * Entry point for building queries.
-   */
-  public query(): Query<T> {
-    const fields = getRepository(
-      this._Entity.prototype.constructor.name
-    ).fields;
-    return new Query(this._Entity, this, fields, this._native);
-  }
 }
 
 /**
@@ -247,62 +140,144 @@ class Collection<T extends Entity, P extends Entity> //eslint-disable-next-line 
 export default <T extends Entity, P extends Entity>(
   model: new () => T,
   parent?: IDocumentRef<P>
-): ICollection<T, P> => new Collection<T, P>(model, parent);
+): _ICollection<T, P> => new CollectionClass<T, P>(model, parent);
 
-export const collection_ = <T extends Entity, P extends Entity>(
-  model: new () => T,
-  parent?: IDocumentRef<P>
-): ICollection<T, P> => {
-  return new Collection<T, P>(model, parent);
-};
-export const create_ = <T extends Entity>(
-  col: ICollection<T>,
-  entity: T
-): Promise<T | null> => {
-  return col.create(entity);
-};
-
-export const getDoc_ = <T extends Entity>(
-  col: ICollection<T>,
-  id: string
-): Promise<T | null> => {
-  {
-    return col.get(id);
-  }
-};
-export const getDocByRef_ = <T extends Entity>(
-  ref: IDocumentRef<T>
-): Promise<T | null> => {
-  {
-    return ref.get();
-  }
-};
-
-export const doc_ = <T extends Entity>(
-  col: ICollection<T>,
+export const _doc = <T extends Entity>(
+  col: _ICollection<T>,
   id: string
 ): IDocumentRef<T> => {
-  return col.doc(id);
+  return DocumentRef(id, col.entity, col);
 };
 
-export const remove_ = <T extends Entity>(
-  col: ICollection<T>,
+/**
+ * Gets a document with a provided ID
+ * @param id The ID of the document.
+ *
+ * @returns The entity.
+ */
+// public async get(id: string): <T | null> {
+//   const dc = await getDoc(doc(this._native, id));
+//   return FirestoreSerializer.deserialize(dc, this._Entity, this);
+// }
+
+export const _getDoc = <T extends Entity>(
+  col: _ICollection<T>,
   id: string
-): Promise<void> => {
-  return col.remove(id);
+): Promise<T | null> => {
+  return new Promise(async (resolve) => {
+    const dc = await getDoc(doc(col.native, id));
+    // const dc = await getDoc(doc(col.native, id).withConverter(null));
+    if (dc.exists()) {
+      resolve(FirestoreSerializer.deserialize(dc, col.entity, col));
+    }
+    return resolve(null);
+  });
 };
-export const query_ = <T extends Entity>(col: ICollection<T>): IQuery<T> => {
-  return col.query();
-};
-export const find_ = <T extends Entity>(
-  col: ICollection<T>,
-  query?: ICollectionQuery<T>
-): Promise<T[]> => {
-  return col.find(query);
-};
-export const update = <T extends Entity>(
-  col: ICollection<T>,
+
+/**
+ * Updates a document from an entity instance.
+ * @param entity The entity (with ID) to update.
+ *
+ * @returns The updated entity.
+ */
+export const _updateDoc = async <T extends Entity>(
+  col: _ICollection<T>,
   entity: T
 ): Promise<T | null> => {
-  return col.update(entity);
+  if (!entity.id) {
+    throw new Error(
+      `An ID must be provided when updating ${entity.constructor.name}`
+    );
+  }
+  const { id, ...data } = FirestoreSerializer.serialize(
+    entity,
+    WriteTypes.Update
+  );
+  await updateDoc(doc(col.native, id), data);
+  return await _getDoc(col, entity.id);
+};
+
+/**
+ * Creates a new document from an entity instance.
+ * @param entity An instance of the entity.
+ *
+ * @returns The created entity.
+ */
+export const _createDoc = async <T extends Entity>(
+  col: _ICollection<T>,
+  entity: T
+): Promise<T | null> => {
+  const { id, ...data } = FirestoreSerializer.serialize(
+    entity,
+    WriteTypes.Create
+  );
+  if (id) {
+    await setDoc(doc(col.native, id), data);
+    return await _getDoc(col, id);
+  } else {
+    const aD = await addDoc(col.native, data);
+    return await _getDoc(col, aD.id);
+  }
+};
+
+export const _findDocs = <T extends Entity>(
+  col: _ICollection<T>,
+  query?: ICollectionQuery<T>
+): Promise<T[]> => {
+  return new Promise((resolve): void => {
+    let querySnapshotPromise: Promise<QuerySnapshot>;
+    if (query) {
+      const fields = getRepository(
+        col.entity.prototype.constructor.name
+      ).fields;
+      querySnapshotPromise = QueryBuilder.get(
+        QueryBuilder.query(col, fields, query)
+      );
+    } else {
+      querySnapshotPromise = getDocs(col.native);
+    }
+    querySnapshotPromise.then((querySnapshot): void => {
+      resolve(
+        querySnapshot.docs.map((snapshot): T => {
+          return FirestoreSerializer.deserialize(
+            snapshot,
+            col.entity,
+            col
+          ) as T;
+        })
+      );
+    });
+  });
+};
+/**
+ * Removes a document from the collection.
+ * @param id The document ID to remove.
+ */
+export const _removeDoc = <T extends Entity>(
+  col: _ICollection<T>,
+  id: string
+): Promise<void> => {
+  return new Promise((resolve): void => {
+    deleteDoc(doc(col.native, id)).then((): void => {
+      resolve();
+    });
+  });
+};
+
+/**
+ * Entry point for building queries.
+ */
+export const _query = <T extends Entity>(col: _ICollection<T>): Query<T> => {
+  const fields = getRepository(col.entity.prototype.constructor.name).fields;
+  return new Query(col.entity, col, fields, col.native);
+};
+export const _onSnapshotDoc = <T extends Entity>(
+  entity: T,
+  // ref: IDocumentRef<T>,
+  onNext: (snapshot: _IDocumentSnapshot<T>) => void,
+  onError?: (e: Error) => void
+): (() => void) => {
+  return entity.ref.onSnapshot((snapshot_): void => {
+    onNext(snapshot_);
+  }, onError);
 };

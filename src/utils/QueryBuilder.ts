@@ -12,9 +12,8 @@ import {
   endBefore as endBeforeOrig,
   limit as limitOrig,
 } from "firebase/firestore";
-// import { Query } from "../Query";
 
-import { IEntity, ICollectionQuery, ICollection, IFieldMeta } from "../types";
+import { IEntity, ICollectionQuery, _ICollection, IFieldMeta } from "../types";
 
 /**
  * Utility functions to build firestore-compatiable queries.
@@ -26,7 +25,7 @@ export default class QueryBuilder {
    * @param query The firestorm query
    */
   public static query<T extends IEntity>(
-    collection: ICollection<T>,
+    collection: _ICollection<T>,
     fields: Map<string, IFieldMeta>,
     query: ICollectionQuery<T>
   ): Query {

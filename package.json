@@ -7,11 +7,12 @@
     "build": "tsc",
     "test": "GOOGLE_APPLICATION_CREDENTIALS='service-account.json' nyc --reporter=lcov mocha -r ts-node/register test/**/*.spec.ts && cat ./coverage/lcov.info | codacy-coverage",
     "test:dev": "GOOGLE_APPLICATION_CREDENTIALS='service-account.json' nyc mocha -r ts-node/register test/**/*.spec.ts",
-    "test1": "nyc mocha -r ts-node/register test/functional/*.spec.ts",
+    "test1": "nyc mocha -r ts-node/register test/ok/*.spec.ts",
     "docs": "typedoc --excludeExternals --mode file --out docs src",
     "lint": "eslint src/**/*.ts",
     "commit": "npx git-cz",
-    "semantic-release": "semantic-release"
+    "semantic-release": "semantic-release",
+    "emu": "firebase emulators:start --import ./.dataexport --project \"fir-1-dd357\""
   },
   "keywords": [
     "firestorm",
@@ -38,7 +39,7 @@
     "chai-as-promised": "^7.1.1",
     "codacy-coverage": "^3.2.0",
     "cz-conventional-changelog": "^3.0.2",
-    "dotenv": "^8.1.0",
+    "dotenv": "^8.6.0",
     "eslint": "^6.2.2",
     "firebase-admin": "^9.9.0",
     "mocha": "^6.2.0",

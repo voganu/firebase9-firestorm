@@ -3,11 +3,7 @@
 import { DocumentReference, GeoPoint } from "firebase/firestore";
 
 import { FieldTypes } from "./enum.types";
-import {
-  ICollection,
-  IEntity,
-  // IDocumentSnapshot
-} from "./collection.types";
+import { _ICollection, IEntity, _IDocumentSnapshot } from "./collection.types";
 
 // Base Field Config
 
@@ -39,14 +35,14 @@ export interface IDocumentRef<T extends IEntity> {
   cached: T | null;
   native: DocumentReference;
   path: string;
-  parent: ICollection<T>;
+  parent: _ICollection<T>;
   isFetched(): boolean;
   get(): Promise<T>;
-  collection<C extends IEntity>(coll: new () => C): ICollection<C>;
-  // onSnapshot(
-  //   onNext: (snapshot: IDocumentSnapshot<T>) => void,
-  //   onError?: (error: Error) => void,
-  // ): (() => void);
+  collection<C extends IEntity>(coll: new () => C): _ICollection<C>;
+  onSnapshot(
+    onNext: (snapshot: _IDocumentSnapshot<T>) => void,
+    onError?: (error: Error) => void
+  ): () => void;
 }
 
 export interface IDocumentRefConfig extends IFieldWithEntityConfig {}

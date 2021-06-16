@@ -1,11 +1,17 @@
-import { IDocumentRef, ICollection } from "../types";
+import { IDocumentRef, _ICollection } from "../types";
 // import { firestore } from 'firebase/app';
-import { DocumentReference, getDoc, doc } from "firebase/firestore";
+import {
+  onSnapshot as onSnapshotOrig,
+  DocumentSnapshot as DocumentSnapshotOrig,
+  DocumentReference,
+  getDoc,
+  doc,
+} from "firebase/firestore";
 import { FirestoreSerializer } from "../utils";
 import Collection from "../Collection";
 import Entity from "../Entity";
 import { getRepository } from "../store";
-// import DocumentSnapshot from '../DocumentSnapshot';
+import DocumentSnapshot from "../DocumentSnapshot";
 
 /**
  * Representation of a Document Reference
@@ -16,7 +22,7 @@ class DocumentRef<T extends Entity> implements IDocumentRef<T> {
   private _model: new () => T;
   private _native: DocumentReference;
   private _path: string;
-  private _parent: ICollection<T>;
+  private _parent: _ICollection<T>;
   private _cachedDocument: T | null;
 
   /**
@@ -26,7 +32,7 @@ class DocumentRef<T extends Entity> implements IDocumentRef<T> {
    * @param model The entity class for the document.
    * @param parent The parent collection.
    */
-  public constructor(id: string, model: new () => T, parent: ICollection<T>) {
+  public constructor(id: string, model: new () => T, parent: _ICollection<T>) {
     this._id = id;
     this._cachedDocument = null;
     this._model = model;
@@ -64,7 +70,7 @@ class DocumentRef<T extends Entity> implements IDocumentRef<T> {
   /**
    * Get the parent collection.
    */
-  public get parent(): ICollection<T> {
+  public get parent(): _ICollection<T> {
     return this._parent;
   }
 
@@ -130,7 +136,7 @@ class DocumentRef<T extends Entity> implements IDocumentRef<T> {
    */
   public collection<C extends Entity>(
     collectionModel: new () => C
-  ): ICollection<C> {
+  ): _ICollection<C> {
     const childRepository = getRepository(
       collectionModel.prototype.constructor.name
     );
@@ -154,23 +160,28 @@ class DocumentRef<T extends Entity> implements IDocumentRef<T> {
    * @param onError Callback which is called when listen fails.
    * @returns The unsubscribe function for the listener.
    */
-  // public onSnapshot(onNext: (snapshot: DocumentSnapshot<T>) => void, onError?: (e: Error) => void): (() => void) {
-  //   return this._native.onSnapshot((snapshot): void => {
-  //     onNext(this.buildSnapshot(snapshot));
-  //   }, onError);
-  // }
+  public onSnapshot(
+    onNext: (snapshot: DocumentSnapshot<T>) => void,
+    onError?: (e: Error) => void
+  ): () => void {
+    return onSnapshotOrig(
+      this._native,
+      (snapshot): void => {
+        onNext(this.buildSnapshot(snapshot));
+      },
+      onError
+    );
+  }
 
   /**
    * Creates a firestorm snapshot from the firestore snapshot.
    * @param nativeSnapshot The native query document snapshot.
    */
-  // private buildSnapshot(nativeSnapshot: firestore.DocumentSnapshot): DocumentSnapshot<T> {
-  //   return new DocumentSnapshot(
-  //     nativeSnapshot,
-  //     this._model,
-  //     this._parent,
-  //   );
-  // }
+  private buildSnapshot(
+    nativeSnapshot: DocumentSnapshotOrig
+  ): DocumentSnapshot<T> {
+    return new DocumentSnapshot(nativeSnapshot, this._model, this._parent);
+  }
 }
 
 /**
@@ -179,5 +190,5 @@ class DocumentRef<T extends Entity> implements IDocumentRef<T> {
 export default <T extends Entity>(
   id: string,
   model: new () => T,
-  parent: ICollection<T>
+  parent: _ICollection<T>
 ): IDocumentRef<T> => new DocumentRef(id, model, parent);

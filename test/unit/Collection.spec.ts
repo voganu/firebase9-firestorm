@@ -6,7 +6,7 @@ import {
   getDoc,
   doc,
 } from "firebase/firestore";
-import { Collection, ICollection, collection_ } from "../../src";
+import { ICollection, collection_, doc_, getDoc_ } from "../../src";
 
 import * as bootstrap from "../bootstrap.spec";
 import Post from "../entities/Post";
@@ -29,7 +29,7 @@ describe("[unit] Collection", (): void => {
     });
     describe("with invalid entity", (): void => {
       it("should throw an error", (): void => {
-        expect((): ICollection<any> => Collection(undefined as any)).to.throw(
+        expect((): ICollection<any> => collection_(undefined as any)).to.throw(
           Error
         );
       });
@@ -38,15 +38,15 @@ describe("[unit] Collection", (): void => {
       let post: ICollection<Post>;
       let firestore: firestoreTypes;
       beforeEach((): void => {
-        post = Collection(Post);
+        post = collection_(Post);
         firestore = bootstrap.getFirestore();
       });
       it("should not throw an error", (): void => {
-        expect((): ICollection<Post> => Collection(Post)).to.not.throw(Error);
+        expect((): ICollection<Post> => collection_(Post)).to.not.throw(Error);
       });
       describe("#doc", (): void => {
         it("should provide a document ref when provided a valid ID", (): void => {
-          const doc = post.doc("hello-world");
+          const doc = getDoc_(post, "hello-world");
           expect(doc).to.not.be.null.and.not.be.undefined;
         });
       });
@@ -55,8 +55,8 @@ describe("[unit] Collection", (): void => {
           expect(post.path).to.equal("/posts");
         });
         it("sub collection should produce a valid path", (): void => {
-          const doc = post.doc("hello-world");
-          expect(doc.collection(Comment).path).to.equal(
+          const doc = doc_(post, "hello-world");
+          expect(collection_(Comment, doc).path).to.equal(
             "/posts/hello-world/comments"
           );
         });

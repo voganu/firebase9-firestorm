@@ -6,13 +6,10 @@ import {
   SnapshotMetadata,
   SnapshotListenOptions,
   CollectionReference,
-  Query as QueryOrig,
-  QuerySnapshot as QuerySnapshotOrig,
 } from "firebase/firestore";
 
 import { IDocumentRef } from "./field.types";
-import QuerySnapshot from "../QuerySnapshot";
-import { _Query } from "..";
+import { Query } from "..";
 
 export interface IEntity {
   id: string;
@@ -20,45 +17,49 @@ export interface IEntity {
   toData(): Record<string, any>;
 }
 
-export interface _IQuery<T extends IEntity> {
-  native: QueryOrig;
-  where(property: keyof T, op: WhereFilterOp, value: any): _Query<T>;
-  orderBy(property: keyof T, sort?: OrderByDirection): _Query<T>;
-  limit(amount: number): _Query<T>;
-  startAt(...fieldValues: any[]): _Query<T>;
-  startAfter(...fieldValues: any[]): _Query<T>;
-  endAt(...fieldValues: any[]): _Query<T>;
-  endBefore(...fieldValues: any[]): _Query<T>;
-  buildSnapshot(nativeSnapshot: QuerySnapshotOrig): QuerySnapshot<T>;
-  // onSnapshot(
-  //   onNext: (snapshot: _IQuerySnapshot<T>) => void,
-  //   onError?: (error: Error) => void
-  // ): () => void;
-  // get(): Promise<_IQuerySnapshot<T>>;
+export interface IQuery<T extends IEntity> {
+  where(property: keyof T, op: WhereFilterOp, value: any): IQuery<T>;
+  orderBy(property: keyof T, sort?: OrderByDirection): IQuery<T>;
+  limit(amount: number): IQuery<T>;
+  startAt(...fieldValues: any[]): IQuery<T>;
+  startAfter(...fieldValues: any[]): Query<T>;
+  endAt(...fieldValues: any[]): Query<T>;
+  endBefore(...fieldValues: any[]): Query<T>;
+  onSnapshot(
+    onNext: (snapshot: IQuerySnapshot<T>) => void,
+    onError?: (error: Error) => void
+  ): () => void;
+  get(): Promise<IQuerySnapshot<T>>;
 }
 
-export interface _IQuerySnapshot<T extends IEntity> {
+export interface IQuerySnapshot<T extends IEntity> {
   docs: T[];
   size: number;
   empty: boolean;
-  query: _IQuery<T>;
+  query: IQuery<T>;
   metadata: SnapshotMetadata;
   forEach: (callback: (doc: T, index: number) => void) => void;
   docChanges: (opts?: SnapshotListenOptions) => DocumentChange<T>[];
 }
 
-export interface _IDocumentSnapshot<T extends IEntity> {
+export interface IDocumentSnapshot<T extends IEntity> {
   doc: T;
   exists: boolean;
   ref: IDocumentRef<T>;
   metadata: SnapshotMetadata;
 }
 
-export interface _ICollection<T extends IEntity, P extends IEntity = any> {
+export interface ICollection<T extends IEntity, P extends IEntity = any> {
   native: CollectionReference;
   path: string;
   parent?: IDocumentRef<P> | null;
-  entity: new () => T;
+  query: () => IQuery<T>;
+  create: (entity: T) => Promise<T | null>;
+  update: (entity: T) => Promise<T | null>;
+  doc: (id: string) => IDocumentRef<T>;
+  get: (id: string) => Promise<T | null>;
+  find: (query?: ICollectionQuery<T>) => Promise<T[]>;
+  remove: (id: string) => Promise<void>;
 }
 
 export interface DocumentChange<T extends IEntity> {

@@ -5,10 +5,10 @@ import {
   // Collection,
   // GeoPoint,
   ICollection,
-  create_,
+  createDoc_,
   collection_,
   doc_,
-  remove_,
+  removeDoc_,
 } from "../../src";
 import Post from "../entities/Post";
 import chaiAsPromised from "chai-as-promised";
@@ -40,7 +40,7 @@ describe("[functional] querying data", (): void => {
     post.title = title;
     post.body = body;
     post.author = doc_(collection_(Author), "john-doe");
-    const newPost = await create_(collectionPost, post);
+    const newPost = await createDoc_(collectionPost, post);
     expect(newPost).to.not.be.null;
     if (newPost) {
       expect(newPost).include.keys("id");
@@ -50,7 +50,7 @@ describe("[functional] querying data", (): void => {
       expect(newPost.title).to.equal(title);
       expect(newPost.body).to.equal(body);
       expect(newPost.posted).to.not.be.null.and.to.not.be.undefined;
-      await remove_(collectionPost, newPost.id);
+      await removeDoc_(collectionPost, newPost.id);
     }
   };
   it("creating document without id should create doc with generated id", async (): Promise<void> => {
